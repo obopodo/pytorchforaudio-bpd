@@ -10,7 +10,13 @@ wheels/
 .venv
 
 # Data files
+*.zip
+*.tar.gz
 data/
+UrbanSound8K/
 
 # Model files
 *.pth
+
+# Apple files
+.DS_Store
