@@ -49,7 +49,7 @@ class UrbanSoundDataset(Dataset):
         filepath, label = self._get_audio_sample_path_and_label(idx)
         waveform, sample_rate = self._load_audio(str(filepath))
         waveform = waveform.to(self.device)
-        waveform = self._transform(waveform)  # -> Tensor (?,?)
+        waveform = self._transform(waveform, sample_rate)  # -> Tensor (n_channels, n_mels, ceil(n_samples / hop_size))
         return waveform, label
 
     def _get_audio_sample_path_and_label(self, idx) -> tuple[Path, int]:
@@ -67,10 +67,10 @@ class UrbanSoundDataset(Dataset):
         waveform, sample_rate = torchaudio.load(filepath, format="wav")
         return waveform, sample_rate
 
-    def _transform(self, waveform):
+    def _transform(self, waveform, sample_rate):
         """Apply the transform to the waveform if specified."""
         if self.transformation:
-            waveform = self.transformation(waveform)
+            waveform = self.transformation(waveform, sample_rate)
         return waveform
 
 
@@ -84,7 +84,6 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     transform_pipeline = TransformPipeline(
-        input_sample_rate=44100,
         target_sample_rate=SAMPLE_RATE,
         num_samples=NUM_SAMPLES,
         n_fft=1024,
@@ -100,5 +99,5 @@ if __name__ == "__main__":
     print("Dataset size:", len(dataset))
 
     waveform, label = dataset[1]
-    # print(waveform.shape, label)
+    print("Mel Spectrogram shape:", waveform.shape, "\nLabel:", label)
     a = 1
