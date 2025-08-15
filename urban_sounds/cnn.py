@@ -5,7 +5,7 @@ from torch import nn
 class CNNNet(nn.Module):
     # TODO: the good idea is to pass conv layers parameters as arguments to init
     # and then try to select the best using hyperparameter tuning
-    def __init__(self, num_classes: int):
+    def __init__(self):
         super().__init__()
         # 4 conv blocks -> flatten -> linear -> softmax
         self.conv1 = nn.Sequential(
@@ -52,10 +52,10 @@ class CNNNet(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
-        self.flatten = nn.Flatten(0, -1)
+        self.flatten = nn.Flatten()
         # TODO: recap how this is calculated: 128 filters, but what are 5 and 4???
-        self.fc = nn.Linear(128 * 4 * 2, num_classes)
-        self.softmax = nn.Softmax()
+        self.fc = nn.Linear(128 * 4 * 2, 10)
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv1(x)
@@ -63,10 +63,6 @@ class CNNNet(nn.Module):
         x = self.conv3(x)
         x = self.conv4(x)
         x = self.flatten(x)
-        try:
-            x = self.fc(x)
-        except:
-            print("Shape before flattening", x.shape)
-            raise
-        x = self.softmax(x)  # TODO: could be that it's better to move to predict
+        x = self.fc(x)
+        # x = self.softmax(x)  # TODO: could be that it's better to move to predict
         return x
