@@ -1,12 +1,12 @@
 import wave
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 import torch
 import torchaudio
 from torch import nn
 from torch.utils.data import Dataset
-from torchaudio.transforms import MelSpectrogram, Resample
 
 from urban_sounds.preprocess import TransformPipeline
 from urban_sounds.utils import get_device
@@ -22,6 +22,8 @@ class UrbanSoundDataset(Dataset):
         annotations_file: str,
         audio_dir: str,
         transformation: nn.Module,
+        test_fold: Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10] = 10,
+        is_test: bool = False,
     ):
         """
         Pytorch Dataset implementation for UrbanSound8K audio files.
@@ -31,12 +33,16 @@ class UrbanSoundDataset(Dataset):
         - annotations_file: Path to the CSV file containing annotations.
         - audio_dir: Directory where audio files are stored.
         - transformation: Spectral transformation to be applied on a sample.
+        - test_fold: The fold number to be used for testing.
+        - is_test: Whether the dataset is for testing or not.
         """
-        self.annotations = pd.read_csv(annotations_file)
+        self.test_fold = test_fold
+        self.is_test = is_test
+        self.annotations = self._load_annotations(annotations_file)
         self.audio_dir = Path(audio_dir)
+        assert self.audio_dir.exists(), f"audio_dir {self.audio_dir} does not exist."
         self.device = get_device()
         self.transformation = transformation.to(self.device) if transformation else None
-        assert self.audio_dir.exists(), f"audio_dir {self.audio_dir} does not exist."
 
     def __len__(self) -> int:
         return len(self.annotations)
@@ -73,6 +79,15 @@ class UrbanSoundDataset(Dataset):
             waveform = self.transformation(waveform, sample_rate)
         return waveform
 
+    def _load_annotations(self, annotations_file: str) -> pd.DataFrame:
+        """Load annotations from a CSV file."""
+        annotations = pd.read_csv(annotations_file)
+        if self.is_test:
+            annotations = annotations.query(f"fold == {self.test_fold}")
+        else:
+            annotations = annotations.query(f"fold != {self.test_fold}")
+        return annotations
+
 
 if __name__ == "__main__":
     ANNOTATIONS_FILE = Path(__file__).parent / "UrbanSound8K/metadata/UrbanSound8K.csv"
@@ -89,7 +104,6 @@ if __name__ == "__main__":
         n_fft=1024,
         n_mels=64,
     )
-    # resample_transform = Resample(orig_freq=44100, new_freq=SAMPLE_RATE)
 
     dataset = UrbanSoundDataset(
         annotations_file=ANNOTATIONS_FILE,
