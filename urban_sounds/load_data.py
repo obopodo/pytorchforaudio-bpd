@@ -79,7 +79,7 @@ class UrbanSoundDataset(Dataset):
     def _resample(self, waveform, input_sample_rate):
         """Resample the waveform to the target sample rate if necessary."""
         if input_sample_rate != self.target_sample_rate:
-            resample_transform = Resample(orig_freq=input_sample_rate, new_freq=self.target_sample_rate)
+            resample_transform = Resample(orig_freq=input_sample_rate, new_freq=self.target_sample_rate).to(self.device)
             waveform = resample_transform(waveform)
         return waveform
 
