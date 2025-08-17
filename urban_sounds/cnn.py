@@ -53,7 +53,7 @@ class CNNNet(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
         self.flatten = nn.Flatten()
-        # TODO: recap how this is calculated: 128 filters, but what are 5 and 4???
+        # TODO: recap how this is calculated: 128 filters, but what are 4 and 2???
         self.fc = nn.Linear(128 * 4 * 2, 10)
         self.softmax = nn.Softmax(dim=1)
 
