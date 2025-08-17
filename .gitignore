@@ -21,3 +21,6 @@ models/
 
 # Apple files
 .DS_Store
+
+# Test notebooks
+test.ipynb
