@@ -16,6 +16,7 @@ data/
 UrbanSound8K/
 
 # Model files
+models/
 *.pth
 
 # Apple files
