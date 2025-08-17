@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -11,6 +12,15 @@ from urban_sounds.cnn import CNNNet
 from urban_sounds.dataset import UrbanSoundDataset
 from urban_sounds.predict import predict
 from urban_sounds.preprocess import TransformPipeline
+
+
+def save_model(model: nn.Module, epoch=None):
+    model_folder = Path(__file__).parent.parent / "models"
+    model_folder.exists() or model_folder.mkdir(parents=True, exist_ok=True)
+    model_name = f"checkpoint_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
+    if epoch is not None:
+        model_name = model_name.replace("checkpoint", f"checkpoint_e{epoch}")
+    save(model.state_dict(), model_folder / model_name)
 
 
 def train_one_epoch(
@@ -38,7 +48,7 @@ def train_one_epoch(
             print(f"Batch {batch}, Batch shape: {X.shape}, Loss: {loss.item()}")
     print(f"Loss: {loss.item()}")
     if save_checkpoint:
-        save(model.state_dict(), "checkpoint.pth")
+        save_model(model)
 
 
 def train(
@@ -58,10 +68,10 @@ def train(
 
 
 if __name__ == "__main__":
-    ANNOTATIONS_FILE = Path(__file__).parent / "UrbanSound8K/metadata/UrbanSound8K.csv"
-    AUDIO_DIR = Path(__file__).parent / "UrbanSound8K/audio"
+    from urban_sounds.constants import ANNOTATIONS_FILE, AUDIO_DIR
+
     LEARNING_RATE = 0.001
-    EPOCHS = 2
+    EPOCHS = 5
 
     transform_pipeline = TransformPipeline(
         target_sample_rate=22050,
@@ -109,5 +119,5 @@ if __name__ == "__main__":
         i = np.random.randint(0, len(test_dataset))
         sample, target = test_dataset[i]
         sample = sample.unsqueeze(0).to(device)
-        predicted_class, expected_class = predict(model, sample, target)
-        print(f"Predicted: {predicted_class}, Expected: {expected_class}")
+        predicted_class, _ = predict(model, sample)
+        print(f"Predicted: {predicted_class}, Expected: {target}")

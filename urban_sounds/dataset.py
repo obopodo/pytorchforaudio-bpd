@@ -90,8 +90,8 @@ class UrbanSoundDataset(Dataset):
 
 
 if __name__ == "__main__":
-    ANNOTATIONS_FILE = Path(__file__).parent / "UrbanSound8K/metadata/UrbanSound8K.csv"
-    AUDIO_DIR = Path(__file__).parent / "UrbanSound8K/audio"
+    from urban_sounds.constants import ANNOTATIONS_FILE, AUDIO_DIR
+
     SAMPLE_RATE = 22050
     NUM_SAMPLES = 22050  # time in seconds == NUM_SAMPLES / SAMPLE_RATE, so here it's 1 second
 
