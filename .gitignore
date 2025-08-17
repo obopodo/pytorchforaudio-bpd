@@ -16,7 +16,11 @@ data/
 UrbanSound8K/
 
 # Model files
+models/
 *.pth
 
 # Apple files
 .DS_Store
+
+# Test notebooks
+test.ipynb
